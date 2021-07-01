@@ -3,8 +3,11 @@ package com.easydemo.gateway.controller;
 import com.alibaba.fastjson.JSON;
 import com.easydemo.gateway.entity.UserParam;
 import com.easydemo.gateway.resp.RtnResp;
+import com.easydemo.gateway.util.HttpClientUtil;
 import com.easydemo.gateway.util.HttpUtil;
 import com.easydemo.gateway.util.ToolsUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api")
 public class GatewayController {
 
+    private static Logger logger = LoggerFactory.getLogger(GatewayController.class);
+
     @Value("${http.server.url}")
     private String userCenterUrl;
 
@@ -36,7 +41,12 @@ public class GatewayController {
             return RtnResp.failure("注册失败: 手机号格式不正确【1开头，长度为11位】");
         }
 
-        return HttpUtil.doHttpPost(JSON.toJSONString(user), userCenterUrl + "/user/add");
+        String response = HttpClientUtil.sendPost(userCenterUrl + "/user/add", user);
+        RtnResp rtnResp = new RtnResp();
+        rtnResp.setData(response);
+        logger.error("请求结果： {}", response);
+        return rtnResp;
+//        return HttpUtil.doHttpPost(JSON.toJSONString(user), userCenterUrl + "/user/add");
     }
 
     /**
